@@ -1,0 +1,62 @@
+services:
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: keycloak
+    ports:
+        - "3333:3306"
+    volumes:
+        - db-data-sql:/var/lib/sql/data
+        - ./init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql
+    networks:
+      - keycloak-network
+    healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:legacy
+    ports:
+      - "9090:8080"
+    environment:
+      DB_VENDOR: mysql
+      DB_ADDR: db
+      DB_DATABASE: keycloak
+      DB_SCHEMA: keycloak
+      DB_USER: root
+      DB_PASSWORD: root
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - keycloak-network
+#
+#
+#  backend-app:
+#    build:
+#      context: src
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      PATH_DB: jdbc:mysql://db:3306/api-example?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+#      SQL_USER: root
+#      SQL_PASSWORD: root
+#      DB_HOST: db
+#      DB_PORT: 3306
+#    depends_on:
+#      db:
+#        condition: service_healthy
+
+networks:
+  keycloak-network:
+    driver: bridge
+
+volumes:
+  db-data-sql:
