@@ -11,7 +11,7 @@ public record UserForm(@NotNull
                        String username,
                        @NotNull
                        @NotBlank(message = "Password cannot be blank")
-                       @Size(min = 15, max = 65)
+                       @Size(min = 8, max = 65)
                        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z]).+$",message = "Password must contain at least one uppercase and one lowercase letter")
                        String password) {
 }
