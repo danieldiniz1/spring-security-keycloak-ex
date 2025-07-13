@@ -42,7 +42,7 @@ public class DefaultKeycloakLoginService implements LoginService<TokenResponseDT
 
     @Override
     public TokenResponseDTO doLogin(UserForm userForm) {
-        HttpEntity<MultiValueMap<String, String>> requestEntity = prepareMultiValueMapHttpEntity(userForm);
+        HttpEntity<MultiValueMap<String, String>> requestEntity = prepareClientCredentialsMultiValueMapHttpEntity(userForm);
 
         try {
             ResponseEntity<TokenResponseDTO> response = restTemplate.postForEntity(
@@ -54,12 +54,46 @@ public class DefaultKeycloakLoginService implements LoginService<TokenResponseDT
             }
         } catch (HttpClientErrorException e) {
             log.error(e.getResponseBodyAsString());
-//            throw new LoginServiceException("Login failed: ");
         }
         throw new LoginServiceException("Login failed: Invalid credentials");
     }
 
-    private HttpEntity<MultiValueMap<String, String>> prepareMultiValueMapHttpEntity(UserForm userForm) {
+    @Override
+    public TokenResponseDTO refreshToken(String refreshToken) {
+        HttpEntity<MultiValueMap<String, String>> requestEntity = prepareRefreshTokensMultiValueMapHttpEntity(refreshToken);
+        try {
+            ResponseEntity<TokenResponseDTO> response = restTemplate.postForEntity(
+                    keycloakServerUrl + "/realms/" + keycloakRealm + "/protocol/openid-connect/token",
+                    requestEntity,
+                    TokenResponseDTO.class);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            }
+        } catch (HttpClientErrorException e) {
+            log.error(e.getResponseBodyAsString());
+        }
+        throw new LoginServiceException("Login failed: Refresh token is invalid or expired");
+    }
+
+    @Override
+    public TokenResponseDTO doLogout(String refreshToken) {
+        return null;
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> prepareRefreshTokensMultiValueMapHttpEntity(String refreshToken) {
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> formData = HttpParamsMapBuilder.builder()
+                .withRefreshToken(refreshToken)
+                .withClientId(keycloakClientId)
+                .withClientSecret(keycloakClientSecret)
+                .withGrantType("refresh_token")
+                .build();
+
+        return new HttpEntity<>(formData, headers);
+    }
+
+    private HttpEntity<MultiValueMap<String, String>> prepareClientCredentialsMultiValueMapHttpEntity(UserForm userForm) {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> formData = HttpParamsMapBuilder.builder()
@@ -72,14 +106,4 @@ public class DefaultKeycloakLoginService implements LoginService<TokenResponseDT
 
         return new HttpEntity<>(formData, headers);
     }
-
-    @Override
-        public TokenResponseDTO refreshToken (String refreshToken){
-            return null;
-        }
-
-        @Override
-        public TokenResponseDTO doLogout (String refreshToken){
-            return null;
-        }
-    }
+}

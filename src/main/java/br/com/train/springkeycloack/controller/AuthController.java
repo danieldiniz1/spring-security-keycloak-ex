@@ -6,10 +6,7 @@ import br.com.train.springkeycloack.service.LoginService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -30,5 +27,14 @@ public class AuthController {
             return ResponseEntity.status(200).body(tokenResponseDTO);
         }
         return ResponseEntity.status(500).body("Unexpected error during login");
+    }
+
+    @PostMapping(value = "/refresh", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> refreshToken(@RequestParam String refreshToken) {
+        TokenResponseDTO tokenResponseDTO = loginService.refreshToken(refreshToken);
+        if (Objects.nonNull(tokenResponseDTO)) {
+            return ResponseEntity.status(200).body(tokenResponseDTO);
+        }
+        return ResponseEntity.status(500).body("Unexpected error during token refresh");
     }
 }
