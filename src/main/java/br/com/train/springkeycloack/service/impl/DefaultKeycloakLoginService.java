@@ -101,7 +101,7 @@ public class DefaultKeycloakLoginService implements LoginService<TokenResponseDT
                 .withPassword(userForm.password())
                 .withClientId(keycloakClientId)
                 .withClientSecret(keycloakClientSecret)
-                .withGrantType(keycloakGrantType)
+                .withGrantType("password")
                 .build();
 
         return new HttpEntity<>(formData, headers);

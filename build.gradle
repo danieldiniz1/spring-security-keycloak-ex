@@ -24,6 +24,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator
     implementation("org.hibernate.validator:hibernate-validator:9.0.1.Final")
     implementation 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
