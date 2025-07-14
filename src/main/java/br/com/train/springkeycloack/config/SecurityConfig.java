@@ -68,14 +68,12 @@ public class SecurityConfig {
     public JwtAuthenticationConverter jwtAuthenticationConverterForKeycloak() {
         Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter = jwt -> {
             Map<String, Object> resourceAccess = jwt.getClaim(REALM_ACCESS);
-            LOGGER.info("Resource access: {}", resourceAccess);
+            LOGGER.debug("Resource access: {}", resourceAccess);
             Collection<String> roles = (Collection<String>) resourceAccess.get("roles");
-            LOGGER.info("Roles access: {}", roles);
-            List<GrantedAuthority> grantedAuthorities = roles.stream()
+            LOGGER.debug("Roles access: {}", roles);
+            return roles.stream()
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toList());
-            LOGGER.info("Granted authorities: {}", grantedAuthorities);
-            return grantedAuthorities;
 
         };
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
